@@ -30,7 +30,7 @@ async def created_post(async_client: AsyncClient) -> dict:
 @pytest.fixture()
 async def created_comment(async_client: AsyncClient, created_post: dict) -> dict:
     """Fixture for a created comment"""
-    return await create_post("Test Comment", created_post["id"], async_client)
+    return await create_comment("Test Comment", created_post["id"], async_client)
 
 
 @pytest.mark.anyio
@@ -79,3 +79,60 @@ async def test_create_comment(async_client: AsyncClient, created_post: dict):
         "body": body,
         "post_id": created_post["id"],
     }.items() <= response.json().items()
+
+
+@pytest.mark.anyio
+async def test_create_comment_invalid_json(
+    async_client: AsyncClient, created_post: dict
+):
+    response = await async_client.post(
+        "/api/v1/posts/comments/",
+        content=json.dumps({}),
+    )
+
+    assert response.status_code == 422
+
+
+@pytest.mark.anyio
+async def test_read_comments_on_post(
+    async_client: AsyncClient, created_post: dict, created_comment: dict
+):
+    response = await async_client.get(f"/api/v1/posts/{created_post['id']}/comments/")
+
+    assert response.status_code == 200
+    assert response.json() == [created_comment]
+
+
+@pytest.mark.anyio
+async def test_read_comments_on_post_empty(
+    async_client: AsyncClient, created_post: dict
+):
+    response = await async_client.get(f"/api/v1/posts/{created_post['id']}/comments/")
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+@pytest.mark.anyio
+async def test_read_post_with_comments(
+    async_client: AsyncClient, created_post: dict, created_comment: dict
+):
+    response = await async_client.get(
+        f"/api/v1/posts/posts_and_comments/{created_post['id']}/"
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "post": created_post,
+        "comments": [created_comment],
+    }
+
+
+@pytest.mark.anyio
+async def test_read_missing_post_with_comments(
+    async_client: AsyncClient, created_post: dict, created_comment: dict
+):
+    response = await async_client.get("/api/v1/posts/posts_and_comments/999/")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Post not found"}

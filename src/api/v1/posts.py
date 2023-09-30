@@ -28,11 +28,13 @@ async def create_post(post: CreatePostSchema):
 
 @router.get("/", response_model=list[PostSchema])
 async def get_all_posts():
+    """Read all Posts"""
     return list(post_table.values())
 
 
 @router.post("/comments/", response_model=CommentSchema, status_code=201)
 async def create_comment(comment: CreateCommentSchema):
+    """Create a Comment on a Post"""
     post = find_post(comment.post_id)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
@@ -44,6 +46,7 @@ async def create_comment(comment: CreateCommentSchema):
 
 @router.get("/{id}/comments/", response_model=list[CommentSchema])
 async def get_comments_on_posts(id: int):
+    """Read all Comments on a Post"""
     post = find_post(id)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
@@ -52,6 +55,7 @@ async def get_comments_on_posts(id: int):
 
 @router.get("/posts_and_comments/{id}/", response_model=PostWithCommentsSchema)
 async def get_post_with_comments(id: int):
+    """Read a Post with all its Comments"""
     post = find_post(id)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
