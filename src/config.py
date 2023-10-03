@@ -11,7 +11,7 @@ class BaseConfig(BaseSettings):
 
 class GlobalConfig(BaseConfig):
     DATABASE_URL: Optional[str] = None
-    # DB_FORCE_ROLLBACK: bool = False
+    DB_FORCE_ROLLBACK: bool = False
 
 
 class DevConfig(GlobalConfig):
@@ -23,6 +23,7 @@ class ProdConfig(GlobalConfig):
 
 
 class TestConfig(GlobalConfig):
+    DB_FORCE_ROLLBACK: bool = True
     model_config = SettingsConfigDict(env_prefix="TEST_")
 
 

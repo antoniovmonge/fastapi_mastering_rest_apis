@@ -36,7 +36,8 @@ class Database:
         )
 
     async def disconnect(self):
-        await self.__engine.dispose()
+        if self.__engine is not None:
+            await self.__engine.dispose()
 
     async def get_db(self):
         async with db.__session() as session:

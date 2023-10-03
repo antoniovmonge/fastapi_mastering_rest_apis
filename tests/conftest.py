@@ -1,3 +1,4 @@
+import os
 from typing import AsyncGenerator, Generator
 
 import pytest
@@ -5,7 +6,10 @@ from fastapi.testclient import TestClient
 from httpx import AsyncClient
 
 from src.api.v1.posts import comment_table, post_table
-from src.main import app
+
+os.environ["ENV_STATE"] = "test"
+
+from src.main import app  # noqa: E402
 
 
 @pytest.fixture(scope="session")
